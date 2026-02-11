@@ -1,0 +1,33 @@
+name: Generate Contribution Art
+on:
+  workflow_dispatch: {} 
+
+permissions:
+  contents: write
+
+jobs:
+  paint-art:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "syscall-silence"
+          git config user.email "sahabirry@gmail.com"
+
+      - name: Process Art Schedule
+        run: |
+          echo "W3siZGF0ZSI6IjIwMjMtMDUtMTYiLCJtZXNzYWdlIjoiQ29udHJpYnV0aW9uOiAyMDIzLTA1LTE2ICMxIiwiY291bnQiOjF9LHsiZGF0ZSI6IjIwMjMtMDUtMTYiLCJtZXNzYWdlIjoiQ29udHJpYnV0aW9uOiAyMDIzLTA1LTE2ICMyIiwiY291bnQiOjF9LHsiZGF0ZSI6IjIwMjMtMDUtMTYiLCJtZXNzYWdlIjoiQ29udHJpYnV0aW9uOiAyMDIzLTA1LTE2ICMzIiwiY291bnQiOjF9LHsiZGF0ZSI6IjIwMjMtMDYtMjMiLCJtZXNzYWdlIjoiQ29udHJpYnV0aW9uOiAyMDIzLTA2LTIzICMxIiwiY291bnQiOjF9LHsiZGF0ZSI6IjIwMjMtMDYtMjMiLCJtZXNzYWdlIjoiQ29udHJpYnV0aW9uOiAyMDIzLTA2LTIzICMyIiwiY291bnQiOjF9LHsiZGF0ZSI6IjIwMjMtMDYtMjMiLCJtZXNzYWdlIjoiQ29udHJpYnV0aW9uOiAyMDIzLTA2LTIzICMzIiwiY291bnQiOjF9LHsiZGF0ZSI6IjIwMjMtMDctMDkiLCJtZXNzYWdlIjoiQ29udHJpYnV0aW9uOiAyMDIzLTA3LTA5ICMxIiwiY291bnQiOjF9LHsiZGF0ZSI6IjIwMjMtMDctMDkiLCJtZXNzYWdlIjoiQ29udHJpYnV0aW9uOiAyMDIzLTA3LTA5ICMyIiwiY291bnQiOjF9LHsiZGF0ZSI6IjIwMjMtMDctMDkiLCJtZXNzYWdlIjoiQ29udHJpYnV0aW9uOiAyMDIzLTA3LTA5ICMzIiwiY291bnQiOjF9LHsiZGF0ZSI6IjIwMjMtMDctMTkiLCJtZXNzYWdlIjoiQ29udHJpYnV0aW9uOiAyMDIzLTA3LTE5ICMxIiwiY291bnQiOjF9LHsiZGF0ZSI6IjIwMjMtMDctMTkiLCJtZXNzYWdlIjoiQ29udHJpYnV0aW9uOiAyMDIzLTA3LTE5ICMyIiwiY291bnQiOjF9LHsiZGF0ZSI6IjIwMjMtMDctMTkiLCJtZXNzYWdlIjoiQ29udHJpYnV0aW9uOiAyMDIzLTA3LTE5ICMzIiwiY291bnQiOjF9XQ==" | base64 -d > schedule.json
+          jq -c '.[]' schedule.json | while read commit; do
+            DATE=$(echo "$commit" | jq -r '.date')
+            MSG=$(echo "$commit" | jq -r '.message')
+            GIT_AUTHOR_DATE="$DATE 12:00:00" GIT_COMMITTER_DATE="$DATE 12:00:00" \
+            git commit --allow-empty -m "$MSG"
+          done
+
+      - name: Push Commits
+        run: git push origin main
